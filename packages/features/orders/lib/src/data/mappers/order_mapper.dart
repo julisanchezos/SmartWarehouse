@@ -13,10 +13,13 @@ extension OrderDtoMapper on OrderDto {
     final currency = fallbackItems.isEmpty
         ? 'ARS'
         : fallbackItems.first.unitPrice.currency;
-    var total = Money.zero(currency);
+    // Sumamos amounts crudos para tolerar monedas mezcladas (back puede tener
+    // productos legacy en distintas currencies). Mostramos en la del primero.
+    var totalCents = 0;
     for (final i in fallbackItems) {
-      total = total + i.subtotal;
+      totalCents += i.subtotal.amount;
     }
+    final total = Money(amount: totalCents, currency: currency);
     return Order(
       id: id,
       items: fallbackItems,

@@ -14,12 +14,16 @@ class Cart {
   /// de referencia).
   Money? get total {
     if (items.isEmpty) return null;
+    // El back puede tener productos en distintas monedas (legacy / seed mixto).
+    // Para no crashear el carrito si se mezclan, sumamos los montos crudos y
+    // mostramos en la moneda del primer producto. Es lossy pero la alternativa
+    // es romper toda la pantalla.
     final currency = items.first.product.price.currency;
-    var sum = Money.zero(currency);
+    var totalCents = 0;
     for (final i in items) {
-      sum = sum + i.subtotal;
+      totalCents += i.subtotal.amount;
     }
-    return sum;
+    return Money(amount: totalCents, currency: currency);
   }
 
   bool get isEmpty => items.isEmpty;
